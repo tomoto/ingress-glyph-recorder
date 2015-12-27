@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Glyph Player</title>
+    <link rel="stylesheet" href="css/styles.css"></link>
+    <script type="text/javascript" src="scripts/lib/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="scripts/utils.js"></script>
+    <script type="text/javascript" src="scripts/tracerenderer.js"></script>
+    <script type="text/javascript" src="scripts/helpers.js"></script>
+    <script>
+    var autoForwardInterval = 5000;
+    var autoForwardTimeoutId = 0;
+    
+   	$(function() {
+   		traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
+   		
+   		$(window).resize(layoutAll);
+   		layoutAll();
+   		
+   		$(document).on("visibilitychange", function() {
+   			if (!document.hidden) {
+   				setAutoForward(autoForwardInterval);
+   			}
+   		});
+   		
+   		populateTraceSelector();
+   	});
+   	
+   	function layoutAll() {
+   		layoutGlyphPane();
+   		$(traceNavigatorElem).width(glyphCanvasElem.width);
+   	}
+   	
+   	function animateTraceForCurrentSelection() {
+   		animateTraceForUrl($(traceSelectorElem).val());
+
+   		setAutoForward(autoForwardInterval);
+   	}
+   	
+   	function setAutoForward(timeout) {
+   		clearTimeout(autoForwardTimeoutId);
+   		autoForwardTimeoutId = setTimeout(doAutoForward, timeout);
+   	}
+   	
+   	function doAutoForward() {
+   		if (!document.hidden) {
+   	   		selectNextTrace();
+   		}
+   	}
+   	
+   	function animateTraceForUrl(url) {
+		$.ajax({
+			url: url,
+			data: null,
+			dataType: "json",
+			success: function(data, status, jqHXR) {
+		   		traceRenderer.clear();
+				traceRenderer.animate(data.points);
+				$(traceDescriptionElem).text(data.description);
+			},
+		});
+   	}
+   	
+   	function populateTraceSelector() {
+   		$.ajax({
+   			url: Environment.traceListUrl,
+   			data: null,
+			dataType: "json",
+   			success: function(traceFileDTOs, status, jqHXR) {
+   				$.each(traceFileDTOs, function(index, traceFileDTO) {
+   					$(traceSelectorElem).append($("<option/>", {
+   						value: traceFileDTO.value,
+   						text: traceFileDTO.text
+   					}));
+   				});
+   				
+   				animateTraceForCurrentSelection();
+   			}
+   		})
+   	}
+   	
+   	function selectPrevTrace() {
+   		if (traceSelectorElem.selectedIndex > 0) {
+   			traceSelectorElem.selectedIndex--;
+   		} else {
+   			traceSelectorElem.selectedIndex = traceSelectorElem.length - 1;
+   		}
+	    animateTraceForCurrentSelection();
+   	}
+   	
+   	function selectNextTrace() {
+   		if (traceSelectorElem.selectedIndex < traceSelectorElem.length - 1) {
+   			traceSelectorElem.selectedIndex++;
+   		} else {
+   			traceSelectorElem.selectedIndex = 0;
+   		}
+   		animateTraceForCurrentSelection();
+   	}
+    </script>
+  </head>
+  <body id="bodyElem">
+    <div id="traceNavigatorElem" class="traceNavigator">
+      <input type="button" value="&lt;&lt;" class="traceNavigatorButton" onclick="selectPrevTrace()"></input>
+      <select id="traceSelectorElem" class="traceSelector" onchange="animateTraceForCurrentSelection()"></select>
+      <input type="button" value="Replay" class="traceNavigatorButton" onclick="animateTraceForCurrentSelection()"></input>
+      <input type="button" value="&gt;&gt;" class="traceNavigatorButton" onclick="selectNextTrace()"></input>
+    </div>
+    <div id="traceDescriptionElem" class="traceDescription"></div>
+    <div id="timeFieldElem" class="timeField"><span id="timeTextElem">----</span> secs</div>
+    <div>
+      <canvas id="glyphCanvasElem" class="glyphCanvas"></canvas>
+    </div>
+    <div>
+      <a href="Record.html">Go to Recorder</a>
+    </div>
+  </body>
+</html>

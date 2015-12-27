@@ -1,0 +1,116 @@
+<html>
+  <head>
+    <title>Glyph Recorder</title>
+    <link rel="stylesheet" href="css/styles.css"></link>
+    <script type="text/javascript" src="scripts/lib/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript" src="scripts/utils.js"></script>
+    <script type="text/javascript" src="scripts/tracerenderer.js"></script>
+    <script type="text/javascript" src="scripts/helpers.js"></script>
+    <script>
+    var recordingContext = null;
+    var lastRecordingContext = null;
+    
+    $(function() {
+    	$(glyphCanvasElem).on('touchstart', glyphStart);
+    	$(glyphCanvasElem).on('touchmove', glyphMove);
+    	$(glyphCanvasElem).on('touchend', glyphEnd);
+    	$(glyphCanvasElem).on('mousedown', glyphStart);
+    	$(glyphCanvasElem).on('mousemove', glyphMove);
+    	$(glyphCanvasElem).on('mouseup', glyphEnd);
+        
+   		traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
+   		
+   		$(window).resize(layoutAll);
+   		layoutAll();
+    });
+    
+    function layoutAll() {
+    	layoutGlyphPane();
+   	}
+    
+    function glyphStart(e) {
+    	e.preventDefault();
+    	
+    	traceRenderer.clear();
+    	
+    	recordingContext = {
+    		points: [],
+    		startTime: DateUtil.getCurrentTimeMillis(),
+    		scale: glyphCanvasElem.width
+    	};
+    	
+    	processPointEvent(e);
+    }
+    
+    function glyphMove(e) {
+    	if (recordingContext) {
+        	e.preventDefault();
+        	processPointEvent(e);
+    	}
+    }
+    
+    function glyphEnd(e) {
+    	if (recordingContext) {
+        	e.preventDefault();
+        	if (recordingContext.points.length > 1) {
+        		traceRenderer.animate(recordingContext.points);
+        	}
+        	lastRecordingContext = recordingContext;
+        	recordingContext = null;
+    	}
+    }
+    
+    function createPoint(pointData) {
+    	var r = glyphCanvasElem.getBoundingClientRect();
+    	var scale = glyphCanvasElem.width;
+    	return {
+    		x: (pointData.pageX - r.left) / scale,
+    		y: (pointData.pageY - r.top) / scale,
+    		timestamp: DateUtil.getCurrentTimeMillis() - recordingContext.startTime,
+    	};
+    }
+    
+    function processPointEvent(e) {
+    	var pointData = e.originalEvent.changedTouches ? e.originalEvent.changedTouches[0] : e;
+    	recordingContext.points.push(createPoint(pointData));
+    }
+    
+    function postLastTrace() {
+    	if (lastRecordingContext && lastRecordingContext.points.length > 1) {
+    		postTrace(lastRecordingContext.points, lastRecordingContext.scale);
+    	}
+    }
+    
+    // server communication
+    
+    function postTrace(points, scale) {
+    	$.ajax({
+    		type: "post",
+    		url: Environment.tracePostUrl,
+    		data:JSON.stringify({
+    			"scale": scale,
+    			"points": points
+    		}),
+    		contentType:"application/json",
+   			success: function(data, status, jqHXR) {
+   				alert("Successfully saved.")
+   				lastRecordingContext = null;
+   			},
+   			error: function(jqXHR, textStatus, errorThrown) {
+   				alert("Could not save.");
+   			}
+    	});
+    }
+    </script>
+  </head>
+  <body id="bodyElem">
+    <div id="timeFieldElem" class="timeField"><span id="timeTextElem">----</span> secs</div>
+    <div>
+      <canvas id="glyphCanvasElem" class="glyphCanvas"></canvas>
+    </div>
+    <div class="traceNavigator">
+      <input type="button" value="Save to Server" class="traceNavigatorButton" onclick="postLastTrace()"></input>
+      <a href="Play.html">Go to Player</a>
+    </div>
+  </body>
+</html>
