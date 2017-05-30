@@ -11,101 +11,101 @@
     var lastRecordingContext = null;
     
     $(function() {
-    	$(glyphCanvasElem).on('touchstart', glyphStart);
-    	$(glyphCanvasElem).on('touchmove', glyphMove);
-    	$(glyphCanvasElem).on('touchend', glyphEnd);
-    	$(glyphCanvasElem).on('mousedown', glyphStart);
-    	$(glyphCanvasElem).on('mousemove', glyphMove);
-    	$(glyphCanvasElem).on('mouseup', glyphEnd);
+        $(glyphCanvasElem).on('touchstart', glyphStart);
+        $(glyphCanvasElem).on('touchmove', glyphMove);
+        $(glyphCanvasElem).on('touchend', glyphEnd);
+        $(glyphCanvasElem).on('mousedown', glyphStart);
+        $(glyphCanvasElem).on('mousemove', glyphMove);
+        $(glyphCanvasElem).on('mouseup', glyphEnd);
         
-   		traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
-   		
-   		$(window).resize(layoutAll);
-   		layoutAll();
+        traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
+        
+        $(window).resize(layoutAll);
+        layoutAll();
     });
     
     function layoutAll() {
-    	layoutGlyphPane();
-   	}
+        layoutGlyphPane();
+    }
     
     function glyphStart(e) {
-    	e.preventDefault();
-    	
-    	traceRenderer.clear();
-    	
-    	recordingContext = {
-    		points: [],
-    		startTime: DateUtil.getCurrentTimeMillis(),
-    		scale: glyphCanvasElem.width
-    	};
-    	
-    	processPointEvent(e);
+        e.preventDefault();
+        
+        traceRenderer.clear();
+        
+        recordingContext = {
+            points: [],
+            startTime: DateUtil.getCurrentTimeMillis(),
+            scale: glyphCanvasElem.width
+        };
+        
+        processPointEvent(e);
     }
     
     function glyphMove(e) {
-    	if (recordingContext) {
-        	e.preventDefault();
-        	processPointEvent(e);
-    	}
+        if (recordingContext) {
+            e.preventDefault();
+            processPointEvent(e);
+        }
     }
     
     function glyphEnd(e) {
-    	if (recordingContext) {
-        	e.preventDefault();
-        	if (recordingContext.points.length > 1) {
-        		traceRenderer.animate(recordingContext.points);
-        	}
-        	lastRecordingContext = recordingContext;
-        	recordingContext = null;
-    	}
+        if (recordingContext) {
+            e.preventDefault();
+            if (recordingContext.points.length > 1) {
+                traceRenderer.animate(recordingContext.points);
+            }
+            lastRecordingContext = recordingContext;
+            recordingContext = null;
+        }
     }
     
     function createPoint(pointData) {
-    	var r = glyphCanvasElem.getBoundingClientRect();
-    	var scale = glyphCanvasElem.width;
-    	return {
-    		x: (pointData.pageX - r.left) / scale,
-    		y: (pointData.pageY - r.top) / scale,
-    		timestamp: DateUtil.getCurrentTimeMillis() - recordingContext.startTime,
-    	};
+        var r = glyphCanvasElem.getBoundingClientRect();
+        var scale = glyphCanvasElem.width;
+        return {
+            x: (pointData.pageX - r.left) / scale,
+            y: (pointData.pageY - r.top) / scale,
+            timestamp: DateUtil.getCurrentTimeMillis() - recordingContext.startTime,
+        };
     }
     
     function processPointEvent(e) {
-    	var pointData = e.originalEvent.changedTouches ? e.originalEvent.changedTouches[0] : e;
-    	var p = createPoint(pointData)
-    	
-    	if (!isOverNode(recordingContext.lastPoint()) && isOverNode(p)) {
-    		vibrate();
-    	}
-    	
-    	recordingContext.points.push(p);
+        var pointData = e.originalEvent.changedTouches ? e.originalEvent.changedTouches[0] : e;
+        var p = createPoint(pointData)
+        
+        if (!isOverNode(recordingContext.lastPoint()) && isOverNode(p)) {
+            vibrate();
+        }
+        
+        recordingContext.points.push(p);
     }
     
     function postLastTrace() {
-    	if (lastRecordingContext && lastRecordingContext.points.length > 1) {
-    		postTrace(lastRecordingContext.points, lastRecordingContext.scale);
-    	}
+        if (lastRecordingContext && lastRecordingContext.points.length > 1) {
+            postTrace(lastRecordingContext.points, lastRecordingContext.scale);
+        }
     }
     
     // server communication
     
     function postTrace(points, scale) {
-    	$.ajax({
-    		type: "post",
-    		url: Environment.tracePostUrl,
-    		data:JSON.stringify({
-    			"scale": scale,
-    			"points": points
-    		}),
-    		contentType:"application/json",
-   			success: function(data, status, jqHXR) {
-   				alert("Successfully saved.")
-   				lastRecordingContext = null;
-   			},
-   			error: function(jqXHR, textStatus, errorThrown) {
-   				alert("Could not save.");
-   			}
-    	});
+        $.ajax({
+            type: "post",
+            url: Environment.tracePostUrl,
+            data:JSON.stringify({
+                "scale": scale,
+                "points": points
+            }),
+            contentType:"application/json",
+            success: function(data, status, jqHXR) {
+                alert("Successfully saved.")
+                lastRecordingContext = null;
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                alert("Could not save.");
+            }
+        });
     }
     </script>
   </head>

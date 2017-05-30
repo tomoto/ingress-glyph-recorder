@@ -11,91 +11,91 @@
     var autoForwardInterval = 5000;
     var autoForwardTimeoutId = 0;
     
-   	$(function() {
-   		traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
-   		
-   		$(window).resize(layoutAll);
-   		layoutAll();
-   		
-   		$(document).on("visibilitychange", function() {
-   			if (!document.hidden) {
-   				setAutoForward(autoForwardInterval);
-   			}
-   		});
-   		
-   		populateTraceSelector();
-   	});
-   	
-   	function layoutAll() {
-   		layoutGlyphPane();
-   		$(traceNavigatorElem).width(glyphCanvasElem.width);
-   	}
-   	
-   	function animateTraceForCurrentSelection() {
-   		animateTraceForUrl($(traceSelectorElem).val());
+    $(function() {
+        traceRenderer = new TraceRenderer(glyphCanvasElem, timeTextElem);
+        
+        $(window).resize(layoutAll);
+        layoutAll();
+        
+        $(document).on("visibilitychange", function() {
+            if (!document.hidden) {
+                setAutoForward(autoForwardInterval);
+            }
+        });
+        
+        populateTraceSelector();
+    });
+    
+    function layoutAll() {
+        layoutGlyphPane();
+        $(traceNavigatorElem).width(glyphCanvasElem.width);
+    }
+    
+    function animateTraceForCurrentSelection() {
+        animateTraceForUrl($(traceSelectorElem).val());
 
-   		setAutoForward(autoForwardInterval);
-   	}
-   	
-   	function setAutoForward(timeout) {
-   		clearTimeout(autoForwardTimeoutId);
-   		autoForwardTimeoutId = setTimeout(doAutoForward, timeout);
-   	}
-   	
-   	function doAutoForward() {
-   		if (!document.hidden) {
-   	   		selectNextTrace();
-   		}
-   	}
-   	
-   	function animateTraceForUrl(url) {
-		$.ajax({
-			url: url,
-			data: null,
-			dataType: "json",
-			success: function(data, status, jqHXR) {
-		   		traceRenderer.clear();
-				traceRenderer.animate(data.points);
-				$(traceDescriptionElem).text(data.description);
-			},
-		});
-   	}
-   	
-   	function populateTraceSelector() {
-   		$.ajax({
-   			url: Environment.traceListUrl,
-   			data: null,
-			dataType: "json",
-   			success: function(traceFileDTOs, status, jqHXR) {
-   				$.each(traceFileDTOs, function(index, traceFileDTO) {
-   					$(traceSelectorElem).append($("<option/>", {
-   						value: traceFileDTO.value,
-   						text: traceFileDTO.text
-   					}));
-   				});
-   				
-   				animateTraceForCurrentSelection();
-   			}
-   		})
-   	}
-   	
-   	function selectPrevTrace() {
-   		if (traceSelectorElem.selectedIndex > 0) {
-   			traceSelectorElem.selectedIndex--;
-   		} else {
-   			traceSelectorElem.selectedIndex = traceSelectorElem.length - 1;
-   		}
-	    animateTraceForCurrentSelection();
-   	}
-   	
-   	function selectNextTrace() {
-   		if (traceSelectorElem.selectedIndex < traceSelectorElem.length - 1) {
-   			traceSelectorElem.selectedIndex++;
-   		} else {
-   			traceSelectorElem.selectedIndex = 0;
-   		}
-   		animateTraceForCurrentSelection();
-   	}
+        setAutoForward(autoForwardInterval);
+    }
+    
+    function setAutoForward(timeout) {
+        clearTimeout(autoForwardTimeoutId);
+        autoForwardTimeoutId = setTimeout(doAutoForward, timeout);
+    }
+    
+    function doAutoForward() {
+        if (!document.hidden) {
+            selectNextTrace();
+        }
+    }
+    
+    function animateTraceForUrl(url) {
+        $.ajax({
+            url: url,
+            data: null,
+            dataType: "json",
+            success: function(data, status, jqHXR) {
+                traceRenderer.clear();
+                traceRenderer.animate(data.points);
+                $(traceDescriptionElem).text(data.description);
+            },
+        });
+    }
+    
+    function populateTraceSelector() {
+        $.ajax({
+            url: Environment.traceListUrl,
+            data: null,
+            dataType: "json",
+            success: function(traceFileDTOs, status, jqHXR) {
+                $.each(traceFileDTOs, function(index, traceFileDTO) {
+                    $(traceSelectorElem).append($("<option/>", {
+                        value: traceFileDTO.value,
+                        text: traceFileDTO.text
+                    }));
+                });
+                
+                animateTraceForCurrentSelection();
+            }
+        })
+    }
+    
+    function selectPrevTrace() {
+        if (traceSelectorElem.selectedIndex > 0) {
+            traceSelectorElem.selectedIndex--;
+        } else {
+            traceSelectorElem.selectedIndex = traceSelectorElem.length - 1;
+        }
+        animateTraceForCurrentSelection();
+    }
+    
+    function selectNextTrace() {
+        if (traceSelectorElem.selectedIndex < traceSelectorElem.length - 1) {
+            traceSelectorElem.selectedIndex++;
+        } else {
+            traceSelectorElem.selectedIndex = 0;
+        }
+        animateTraceForCurrentSelection();
+    }
     </script>
   </head>
   <body id="bodyElem">
