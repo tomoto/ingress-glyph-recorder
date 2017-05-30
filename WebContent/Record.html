@@ -72,7 +72,13 @@
     
     function processPointEvent(e) {
     	var pointData = e.originalEvent.changedTouches ? e.originalEvent.changedTouches[0] : e;
-    	recordingContext.points.push(createPoint(pointData));
+    	var p = createPoint(pointData)
+    	
+    	if (!isOverNode(recordingContext.lastPoint()) && isOverNode(p)) {
+    		vibrate();
+    	}
+    	
+    	recordingContext.points.push(p);
     }
     
     function postLastTrace() {
