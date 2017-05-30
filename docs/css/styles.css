@@ -1,0 +1,33 @@
+div {
+	margin: 0 auto;
+	text-align: center;
+}
+
+.glyphCanvas {
+	background-image: url('../images/bg_glyph.png');
+	background-size: 100%;
+}
+
+.timeField {
+	text-align: center;
+	background-color: #000000;
+	color: #ab8c2e;
+	padding: 8px 0px 8px 0px; 
+}
+
+.traceNavigator {
+	margin: 8px auto 8px auto;
+}
+
+.traceNavigatorButton {
+	font-size: 1.5em;
+}
+
+.traceSelector {
+	font-size: 1.5em;
+}
+
+.traceDescription {
+	font-size: 1.5em;
+	margin: 8px auto 8px auto;
+}
