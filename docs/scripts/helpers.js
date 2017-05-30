@@ -23,13 +23,13 @@ var nodePositions = [
     { x:0, y:-nodePositionParams.dy1 },
     { x:0, y:nodePositionParams.dy1 },
     { x:nodePositionParams.dx2,    y:nodePositionParams.dy2 },
-    { x:nodePositionParams.dx2*2,  y:nodePositionParams.dy*2 },
+    { x:nodePositionParams.dx2*2,  y:nodePositionParams.dy2*2 },
     { x:nodePositionParams.dx2,    y:-nodePositionParams.dy2 },
-    { x:nodePositionParams.dx2*2,  y:-nodePositionParams.dy*2 },
+    { x:nodePositionParams.dx2*2,  y:-nodePositionParams.dy2*2 },
     { x:-nodePositionParams.dx2,   y:-nodePositionParams.dy2 },
-    { x:-nodePositionParams.dx2*2, y:-nodePositionParams.dy*2 },
+    { x:-nodePositionParams.dx2*2, y:-nodePositionParams.dy2*2 },
     { x:-nodePositionParams.dx2,   y:nodePositionParams.dy2 },
-    { x:-nodePositionParams.dx2*2, y:nodePositionParams.dy*2 }
+    { x:-nodePositionParams.dx2*2, y:nodePositionParams.dy2*2 }
 ];
 
 function isOverNode(p) {
