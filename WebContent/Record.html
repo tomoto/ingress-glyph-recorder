@@ -36,7 +36,8 @@
         recordingContext = {
             points: [],
             startTime: DateUtil.getCurrentTimeMillis(),
-            scale: glyphCanvasElem.width
+            scale: glyphCanvasElem.width,
+            lastPoint: function() { return this.points[this.points.length-1]; }
         };
         
         processPointEvent(e);
